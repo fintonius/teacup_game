@@ -1,0 +1,13 @@
+#canvas1{
+    position: absolute;
+    height: 400px;
+    width: 600px;
+    border: solid black 1px;
+}
+
+#teabag{
+    position: relative;
+    width: 25px;
+    height: 25px;
+    border: dashed 1px red;
+}
