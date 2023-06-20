@@ -7,7 +7,7 @@
 
 #teabag{
     position: relative;
-    width: 25px;
-    height: 25px;
+    width: 5px;
+    height: 5px;
     border: dashed 1px red;
 }
