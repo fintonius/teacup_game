@@ -1,8 +1,10 @@
 #canvas1{
+    z-index: 0;
     position: absolute;
     height: 400px;
     width: 600px;
     border: solid black 1px;
+    
 }
 
 #teabag{
@@ -10,4 +12,26 @@
     width: 5px;
     height: 5px;
     border: dashed 1px red;
+}
+
+#userInput {
+    z-index: 1;
+    position: absolute;
+    margin-top: 15px;
+    margin-left: 300px;
+    width: 200px;
+    height: 180px;
+    border: solid 1px red;
+}
+
+#userBall {
+    z-index: inherit;
+    position: relative;
+    border: 1px solid black;
+    width: 5px;
+    height: 5px;
+    border-radius: 50%;
+    margin-top: 92px;
+    margin-left: 98px;
+    cursor: pointer;
 }
