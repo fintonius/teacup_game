@@ -2,11 +2,9 @@
 
 const canvas = document.getElementById('canvas1');
 const ctx = canvas.getContext('2d');
-CANVAS_WIDTH =  canvas.width = 600;
+CANVAS_WIDTH =  canvas.width = 1000;
 CANVAS_HEIGHT = canvas.height = 400;
 
-const counter = document.getElementById('counter');
-counter.textContent = 0;
 const userInput = document.getElementById('userInput');
 let g = 9.8;
 let velocity = 0;
@@ -20,7 +18,7 @@ let vy = 0;
 let velocityCounter = document.getElementById('velocity');
 velocityCounter.textContent = 'Velocity = 0'
 let angleCounter = document.getElementById('angle');
-angleCounter.textContent = 'Angle = 0'
+angleCounter.textContent = 'Angle = 0';
 
 const frame = document.getElementById('userInput');
 const dragger = document.getElementById('userBall');
@@ -34,13 +32,13 @@ dragger.addEventListener('mousedown', (element) => {
         let currentX = e.x;
         let currentY = e.y;
         dragger.style.right = (startX - currentX) + 'px';
-        velocity = (startX - currentX)/50;
+        velocity = Math.floor(startX - currentX)/100;
         dragger.style.bottom = (startY - currentY) + 'px';
         angle = (startY - currentY);
         angleCounter.textContent = 'Angle = ' + angle;
         velocityCounter.textContent = 'Velocity = ' + velocity;
-        // console.log('test velocity', velocity);
-        // console.log('test angle', angle);
+        console.log('test velocity', velocity);
+        console.log('test angle', angle);
     }
     function endInput() {
         movement(velocity, angle);
@@ -71,59 +69,112 @@ function movement(v, a) {
      t = (2 * vy)/g
     console.log('testing t =', t);
     //3.calculate max height, h, reached by the object
-    h = (vy * vy)/(2*g);
+    h = (vy * vy)/(2*g) * 1000;
     console.log('testing h =', h);
     //4.calculate the horizontal distance, d, traveled by the object
-     d = vx * t;
+     d = (vx * t) * 5000;
     console.log('testing d =', d);
     //5.calculate the range, r, which is the horizontal distance
     //traveled by the object when it returns to the same height as launch point
      r = 2 * d;
     console.log('testing r =', r);
-    console.log('testing movement function. r =', Math.floor(r*1000), 'h =', Math.floor(h * 1000));
 }
 
 // console.log(movement(velocity, angle));
 // vy = velocity * Math.sin(angle);
 // let time = (2 * vy)/g;
 const teabag = {
-    x: 1,
+    x: 10,
     y: 300,
-   curve: Math.random() * 7,
-    angle: 50,
+    currentY: 0,
+    maxY: CANVAS_HEIGHT/2 + angle,
+    angle: angle,
+    angleSpeed: 1,
+    curve: 1,
     
      update() {  
-        this.x += vx * 10;
-        // console.log('testing');
-    //     this.y = Math.floor((2 * vy)/g);
-    //     this.angle = Math.floor(time/1000);
-    // //     // console.log(this.y)
-    //    if (this.x < d) {
-    //     this.x += vx;
-    //    } else {
-    //     this.x = 30;
-    //    }
-    //    this.y += this.curve * Math.sin(this.angle); 
-    //    else if (this.x < velocity && this.y <= angle) {
-    //     this.x++;
-    //     this.y++;
-    //     console.log('testing y', this.y);
-    //    }
+
+        
+        // this.angle += this.angleSpeed;
+       if (this.x < r && this.y > 0) {
+        this.x += velocity * 5;
+        // this.y = Math.sin(this.x * 0.1) * angle;
+        // this.y -= this.curve * Math.sin(this.angle);
+        this.y--;
+        // this.startY += this.maxY - this.currentY;
+        // console.log('testing y', this.y);
+       
+       } else if(this.x >= r && this.y < CANVAS_HEIGHT - 10) {
+        // console.log('this is working');
+        // this.y -= this.curve * Math.sin(this.angle);
+        // this.y-= velocity  * 5;
+        // this.y += this.curve * Math.sin(this.angle);
+        this.y++;     
+        this.x += velocity * 5; 
+        // this.y += velocity * 2;
+        // this.y += this.curve * Math.sin(this.angle);
+        // this.angle += this.angleSpeed;
+        // this.y = Math.sin(this.x * 0.1) * angle;
+       } else if (this.x === r) {
+        this.x = this.x;
+       }
+
+       if(this.x > cup.x + cup.width ||
+        this.x + this.width < cup.x ||
+        this.y > cup.y + cup.height ||
+        this.y + this.height < cup.y)
+        { 
+            console.log('BANG!!!');
+            this.collide();
+        } else {
+            console.log('no collision');
+ 
+        }
+
      },
      draw() {
         ctx.beginPath();
         ctx.arc(this.x, this.y, 10, 0, 2 * Math.PI);        
         ctx.stroke();
      },
+     collide() {
+        this.x = cup.x;
+     }
+}
+
+const cup = {
+    x: 900,
+    y: 385,
+    width: 55,
+    height: 150,
+    draw() {
+        ctx.beginPath();
+        ctx.rect(this.x, this.y, this.width, this.height);
+        ctx.stroke();
+    },
 }
 
 function animate() {
     ctx.clearRect(0,0, CANVAS_WIDTH, CANVAS_HEIGHT);
         teabag.draw();
+        cup.draw();
         teabag.update();
-    //     frameCount++
-    // frameCounter.textContent = frameCount;
-    requestAnimationFrame(animate);
-}
-// animate();
+        requestAnimationFrame(animate);
+};
 
+// this.angle = 0;
+//         this.angleSpeed = Math.random() * 0.2;
+//         this.curve = Math.random() * 7;
+//     }
+//     update(){
+//         this.x -= this.speed;
+
+//         //this is to create a wave pattern that the enemy follows on the y axis
+//         //to create up & down movement
+
+//         if(this.x + this.width <0) this.x = canvas.width;
+//         //animate sprites
+//         if (gameFrame % this.flapSpeed == 0){
+//         this.frame > 4 ? this.frame = 0 : this.frame++;
+//         }
+//     }
