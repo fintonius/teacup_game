@@ -9,6 +9,7 @@ let cursorPos = document.addEventListener('click', (e) => {
     console.log('x = ', e.x, 'y = ', e.y)
 })
 
+
 const userInput = document.getElementById('userInput');
 let g = 9.8;
 let velocity = 0;
@@ -100,8 +101,8 @@ function movement(v, a) {
 const teabag = {
     x: 10,
     y: 300,
-    width: 10,
-    height: 10,
+    width: 15,
+    height: 15,
     currentY: 0,
     maxY: CANVAS_HEIGHT/2 + angle,
     angle: angle,
@@ -116,10 +117,11 @@ const teabag = {
             if (this.y + this.height >= CANVAS_HEIGHT) {
                 this.y = CANVAS_HEIGHT - this.height;
                } 
+         
            } else if (this.x < r && this.y > 0) {
         this.x += velocity * 5;
         this.y -= velocity;      
-       } else if(this.x >= r && this.y < CANVAS_HEIGHT - 10) {
+       } else if(this.x >= r && this.y < CANVAS_HEIGHT - 8) {
         this.y += velocity;     
         this.x += velocity * 5; 
        } else if (this.x === r) {
@@ -178,14 +180,14 @@ const teabag = {
         ctx.stroke();
      },
      collide() {
-        alert('you scored!')
+        console.log('you scored!')
      }
 }
 
 const cupBottom = {
-    x: 905,
-    y: 390,
-    width: 50,
+    x: 749,
+    y: 525,
+    width: 90,
     height: 15,
     draw() {
         ctx.beginPath();
@@ -196,10 +198,10 @@ const cupBottom = {
 }
 
 const cupSide1 = {
-    x: 900,
-    y: 335,
+    x: 752,
+    y: 458,
     width: 5,
-    height: 155,
+    height: 100,
     draw() {
         ctx.beginPath();
         ctx.rect(this.x, this.y, this.width, this.height);
@@ -208,10 +210,10 @@ const cupSide1 = {
 }
 
 const cupSide2 = {
-    x: 956,
-    y: 285,
+    x: 828,
+    y:458,
     width: 5,
-    height: 155,
+    height: 100,
     draw() {
         ctx.beginPath();
         ctx.rect(this.x, this.y, this.width, this.height);
