@@ -3,7 +3,7 @@
 const canvas = document.getElementById('canvas1');
 const ctx = canvas.getContext('2d');
 CANVAS_WIDTH =  canvas.width = 1000;
-CANVAS_HEIGHT = canvas.height = 400;
+CANVAS_HEIGHT = canvas.height = 600;
 
 let cursorPos = document.addEventListener('click', (e) => {
     console.log('x = ', e.x, 'y = ', e.y)

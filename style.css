@@ -5,10 +5,12 @@ body{
 #canvas1{
     z-index: 0;
     position: absolute;
-    height: 400px;
+    height: 600px;
     width: 1000px;
     border: solid black 1px;
     margin-top: 0;
+    background-image: url(images/Game-environment-background\ .jpg);
+    background-size: 100% 100%;
     
 }
 
