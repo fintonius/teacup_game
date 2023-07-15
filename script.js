@@ -104,9 +104,7 @@ const teabag = {
     angleSpeed: 1,
     curve: 1,
     
-     update() {  
-
-        
+     update() {          
         // this.angle += this.angleSpeed;
         if (this.x + this.width  >= CANVAS_WIDTH) {
             this.x = CANVAS_WIDTH - this.width;
@@ -124,10 +122,7 @@ const teabag = {
             this.x = this.x;
             
        }
-
-      
-
-     },
+    },
      draw() {
         ctx.beginPath();
         // ctx.rect(this.x, this.y, this.width, this.height)
