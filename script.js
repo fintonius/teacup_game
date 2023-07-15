@@ -5,6 +5,10 @@ const ctx = canvas.getContext('2d');
 CANVAS_WIDTH =  canvas.width = 1000;
 CANVAS_HEIGHT = canvas.height = 400;
 
+let cursorPos = document.addEventListener('click', (e) => {
+    console.log('x = ', e.x, 'y = ', e.y)
+})
+
 const userInput = document.getElementById('userInput');
 let g = 9.8;
 let velocity = 0;
@@ -25,7 +29,7 @@ const dragger = document.getElementById('userBall');
 dragger.addEventListener('mousedown', (element) => {
     let startX = element.x;
     let startY = element.y;
-    console.log(startY);
+    // console.log(startY);
     frame.onmousemove = dragBall;
     frame.onmouseup = endInput;
     function dragBall (e) {
@@ -37,8 +41,8 @@ dragger.addEventListener('mousedown', (element) => {
         angle = (startY - currentY) * -1;
         angleCounter.textContent = 'Angle = ' + angle;
         velocityCounter.textContent = 'Velocity = ' + velocity;
-        console.log('test velocity', velocity);
-        console.log('test angle', angle);
+        // console.log('test velocity', velocity);
+        // console.log('test angle', angle);
     }
     function endInput() {
         movement(velocity, angle);
@@ -61,33 +65,33 @@ function movement(v, a) {
     
     //1.split velocity into its horizontal, vx, and vertical, vy, components &
     //calculate the initial vertical and horizontal velocitys
-    console.log('test v = ', v, 'test a=', a )
+    // console.log('test v = ', v, 'test a=', a )
     vy = v * Math.sin(a);
     vx = v * Math.cos(a);
 
     if(vy < 0) vy * -1;
     if(vx < 0) vx * -1;
-    console.log ('testing vy & vx. vy = ', vy, 'vx=', vx);
+    // console.log ('testing vy & vx. vy = ', vy, 'vx=', vx);
     //2.calculate time(t) of flight
      t = (2 * vy)/g
     if(t < 0) t * -1;
-    console.log('testing t =', t);
+    // console.log('testing t =', t);
 
     //3.calculate max height, h, reached by the object
     h = (vy * vy)/(2*g) * 1000;
     
     if(h < 0) h * -1;
-    console.log('testing h =', h);
+    // console.log('testing h =', h);
     //4.calculate the horizontal distance, d, traveled by the object
      d = (vx * t) * 5000;
     
     if (d<0) d * -1;
-    console.log('testing d =', d);
+    // console.log('testing d =', d);
     //5.calculate the range, r, which is the horizontal distance
     //traveled by the object when it returns to the same height as launch point
      r = 2 * d;
      if(r < 0) r = r * -1;
-    console.log('testing r =', r);
+    // console.log('testing r =', r);
 }
 
 // console.log(movement(velocity, angle));
@@ -119,9 +123,53 @@ const teabag = {
         this.y += velocity;     
         this.x += velocity * 5; 
        } else if (this.x === r) {
-            this.x = this.x;
+            this.x = this.x;           
+       };
+
+       if(cupSide1.x  > teabag.x + teabag.width -6 ||
+        cupSide1.x + cupSide1.width -6 < teabag.x ||
+        cupSide1.y + 6 > teabag.y + teabag.height ||
+        cupSide1.y + cupSide1.height + 6 < teabag.y)
+        { 
+            // console.log('no collision');
+        } else {
+                console.log('BANG!!!');
+                this.x = cupSide1.x - this.width;
+                this.y += velocity * 3;
+                // teabag.collide();
+            } 
+
+            if(     cupSide2.x  > teabag.x + teabag.width -6 ||
+                    cupSide2.x + cupSide2.width -6 < teabag.x ||
+                    cupSide2.y + 6 > teabag.y + teabag.height ||
+                    cupSide2.y + cupSide2.height + 6 < teabag.y)
+                { 
+                    // console.log('no collision');
+                } else {
+                        console.log('BANG!!!');
+                        this.x = cupSide2.x - this.width;
+                        this.y += velocity * 3;
+                        // teabag.collide();
+                    } 
             
-       }
+        //     else {
+        //     console.log('BANG!!!');
+        //     this.x = cupSide1.x - this.width;
+        //     this.y += velocity * 3;
+        //     // teabag.collide();
+        // }
+        // ;
+       if(cupBottom.x  > teabag.x + teabag.width -6 ||
+        cupBottom.x + cupBottom.width -6 < teabag.x ||
+        cupBottom.y + 6 > teabag.y + teabag.height ||
+        cupBottom.y + cupBottom.height + 6 < teabag.y)
+        { 
+            console.log('no collision');
+        } else {
+            console.log('BANG!!!');
+            teabag.collide();
+        };
+
     },
      draw() {
         ctx.beginPath();
@@ -134,10 +182,35 @@ const teabag = {
      }
 }
 
-const cup = {
+const cupBottom = {
+    x: 905,
+    y: 390,
+    width: 50,
+    height: 15,
+    draw() {
+        ctx.beginPath();
+        ctx.rect(this.x, this.y, this.width, this.height);
+        ctx.strokeStyle = "red";
+        ctx.stroke();
+    },
+}
+
+const cupSide1 = {
     x: 900,
+    y: 335,
+    width: 5,
+    height: 155,
+    draw() {
+        ctx.beginPath();
+        ctx.rect(this.x, this.y, this.width, this.height);
+        ctx.stroke();
+    },
+}
+
+const cupSide2 = {
+    x: 956,
     y: 285,
-    width: 55,
+    width: 5,
     height: 155,
     draw() {
         ctx.beginPath();
@@ -149,25 +222,16 @@ const cup = {
 function animate() {
     ctx.clearRect(0,0, CANVAS_WIDTH, CANVAS_HEIGHT);
         teabag.draw();
-        cup.draw();
+        cupSide1.draw();
+        cupSide2.draw();
+        cupBottom.draw();
         teabag.update();
-        if(cup.x  > teabag.x + teabag.width -6 ||
-            cup.x + cup.width -6 < teabag.x ||
-            cup.y + 6 > teabag.y + teabag.height ||
-            cup.y + cup.height + 6 < teabag.y)
-            { 
-                console.log('no collision');
-            } else {
-                console.log('BANG!!!');
-                teabag.collide();
-
-                
-            }
+        
         requestAnimationFrame(animate);
 };
 
 
-console.log('cup x and width', cup.x, cup.width);
-console.log('cup.x + width', (cup.x + cup.width));
-console.log('teabag x and width', teabag.x, teabag.width);
-console.log('teabag.x + width', (teabag.x + teabag.width));
+// console.log('cup x and width', cup.x, cup.width);
+// console.log('cup.x + width', (cup.x + cup.width));
+// console.log('teabag x and width', teabag.x, teabag.width);
+// console.log('teabag.x + width', (teabag.x + teabag.width));
