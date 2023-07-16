@@ -8,8 +8,14 @@ CANVAS_HEIGHT = canvas.height = 600;
 let handImage = new Image();
 handImage.src = 'images/hand-holding.png'; 
 
+let teabagImage = new Image();
+teabagImage.src = 'images/teabag.png';
+
 let cupFront = new Image();
-cupFront.src = 'images/cup-front-fill.png';
+cupFront.src = 'images/cup-front-125-big.png';
+
+let cupBack = new Image();
+cupBack.src = 'images/cup-back-125-big.png';
 
 let cursorPos = document.addEventListener('click', (e) => {
     console.log('x = ', e.x, 'y = ', e.y)
@@ -27,10 +33,8 @@ canvas.addEventListener('mousemove', e => {
         y: e.clientY - canvas.offsetTop,
     }
 });
-let power = 0;
-// canvas.addEventListener('mousedown', e => {
 
-// })
+let power = 0;
 
 let velocityCounter = document.getElementById('velocity');
 velocityCounter.textContent = 'Power = 0'
@@ -38,24 +42,24 @@ velocityCounter.textContent = 'Power = 0'
 canvas.addEventListener('mousedown', (element) => {
     let startX = element.x;
     let velocity = 0;
-    canvas.onmousemove = dragBall;
+    canvas.onmousemove = dragMouse;
     canvas.onmouseup = endInput;
-    function dragBall (e) {
+
+    function dragMouse (e) {
         let currentX = e.x;
         velocity = Math.floor(startX - currentX)/40;
         velocityCounter.textContent = 'Power = ' + velocity;
-
     }
+
     function endInput() {
        power = velocity;
-       console.log('power is', power);
-
-       if(handAngle < -2 || handAngle > 0.5) return;
-
-    let teaBagPos = teabagPosition(hand.x, hand.y)
-    teaBags.push(
+       console.log('handangle is', handAngle);
+       if(handAngle < -1 || handAngle > 1) return;
+        let teaBagPos = teabagPosition(hand.x, hand.y)
+            teaBags.push(
         new singleTeaBag(handAngle, teaBagPos.x, teaBagPos.y)
     );
+
         canvas.onmousemove = null;
     }
 })
@@ -69,26 +73,24 @@ canvas.addEventListener('mousedown', (element) => {
 //     );
 // })
 
-
-
 const cupBottom = {
-    x: 749,
-    y: 525,
-    width: 90,
-    height: 15,
+    x: 743,
+    y: 510,
+    width: 98,
+    height: 45,
     draw() {
         ctx.beginPath();
         ctx.rect(this.x, this.y, this.width, this.height);
-        ctx.strokeStyle = "red";
+        ctx.strokeStyle = "white";
         ctx.stroke();
     },
 }
 
 const cupSide1 = {
-    x: 752,
-    y: 458,
+    x: 738,
+    y: 432,
     width: 5,
-    height: 100,
+    height: 125,
     draw() {
         ctx.beginPath();
         ctx.rect(this.x, this.y, this.width, this.height);
@@ -97,10 +99,10 @@ const cupSide1 = {
 }
 
 const cupSide2 = {
-    x: 828,
-    y:458,
+    x: 841,
+    y:432,
     width: 5,
-    height: 100,
+    height: 125,
     draw() {
         ctx.beginPath();
         ctx.rect(this.x, this.y, this.width, this.height);
@@ -113,13 +115,13 @@ const cupSide2 = {
 function teabagPosition(x, y) {
     let rotatedAngle = handAngle;
 //works out distance between rotation point and tip of hand
-    let dx = x - (hand.x + 57);
-    let dy = y - (hand.y - 118);
+    let dx = x - (hand.x - 678/2);
+    let dy = y - (hand.y + 115);
     let distance = Math.sqrt(dx * dx + dy * dy);
     let originalAngle = Math.atan2(dy, dx);
 //works out the new position for teabag starting point
-    let newX = (hand.x + 57) + distance * Math.cos(originalAngle + rotatedAngle);
-    let newY = (hand.y - 118) + distance * Math.sin(originalAngle + rotatedAngle);
+    let newX = (hand.x - 678/2) + distance * Math.cos(originalAngle + rotatedAngle);
+    let newY = (hand.y + 115) + distance * Math.sin(originalAngle + rotatedAngle);
 
     return {
         x: newX,
@@ -140,7 +142,7 @@ class Hand {
 //only the hand has moved
         ctx.save();
         this.rotateHand();
-        ctx.drawImage(handImage, this.x - 60, this.y - 115, 115, 236);
+        ctx.drawImage(handImage, this.x - 60, this.y - 125, 115, 236);
     }
 
     rotateHand() {
@@ -161,13 +163,13 @@ class Hand {
     }
 }
 
-let hand = new Hand(81, 309);
+let hand = new Hand(125, 309);
 
 class singleTeaBag {
     constructor(angle, x, y) {
         this.radius = 15;
-        this.height = 15;
-        this.width = 15;
+        this.height = 45;
+        this.width = 45;
         this.mass = this.radius;
         this.angle = angle;
         this.x = x;
@@ -175,18 +177,18 @@ class singleTeaBag {
         this.dx = Math.cos(angle) * power;
         this.dy = Math.sin(angle) * 7;
         this.gravity = 0.08;
-        this.elasticity = 0.5;
+        this.elasticity = 0.8;
         this.friction = 0.008;
     }
 
     move() {
 //factors gravity into the teabags movement
-        // if(collisionDetected) {
-        //     this.dx = 0;
-        //     this.dy = 0;
-        //     this.y += 0;
-        //     this.x += 0;
-        // }
+        if(collisionDetected) {
+            this.dx = 0;
+            this.dy = 0;
+            this.y += 0;
+            this.x += 0;
+        }
         if(this.y + this.gravity < 600){
             this.dy += this.gravity;
         }
@@ -197,10 +199,11 @@ class singleTeaBag {
     }
 
     draw() {
-        ctx.fillStyle = 'grey';
-        ctx.beginPath();
-        ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
-        ctx.fill();
+        // ctx.fillStyle = 'grey';
+        // ctx.beginPath();
+        // ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
+        // ctx.fill();
+        ctx.drawImage(teabagImage,this.x, this.y, this.width, this.height)
     }
 }
 
@@ -210,91 +213,70 @@ let collisionDetected = false;
 function teaBagCollision(bag){
     // console.log('x pos is', bag.x, 'y pos is', bag.y);
     //detecting collision with canvas edge
-    if(bag.x + bag.radius > 982 ||
-        bag.x - bag.radius < 20 ||
-        bag.y + bag.radius > 542 ||
-        bag.y - bag.radius < 20) {
-
-            bag.dy = (bag.dy * bag.elasticity);
-            
-
+    if(bag.x + bag.width > 982 ||
+        bag.x - bag.width < 20 ||
+        bag.y + bag.height > 542 ||
+        bag.y - bag.height < 5) {
+            bag.dy = (bag.dy * bag.elasticity); 
             //right side of bag hits right side of canvas
-            if(bag.x  > 985) {
-                bag.x = 985;
-                bag.dy *= -1;
+            if(bag.x  > 965) {
+                bag.x = 965;
+                bag.dy *= 1.2;
+                if(bag.y > 520) {
+                    bag.y = 520;
+                    bag.dy = 0;
+                }
             //left side of bag hits left side of canvas
-            } else if (bag.x - bag.radius < 20) {
-                bag.x = 20 + bag.radius;
-                
-
+            } else if (bag.x - bag.width < 20) {
+                bag.x = 20 + bag.width;
             //top of
-            } else if (bag.y + bag.radius > 542) {
-                // console.log('collided with bottom');
-                bag.y = 542 + bag.radius;
+            } else if (bag.y + bag.height > 520) {
+                bag.y = 470 + bag.height;
                 bag.dy *= -1;
-            } else if (bag.y - bag.radius < 20) {
-                bag.y = 20 + bag.radius;
+            } else if (bag.y - bag.height < 10) {
+                bag.y = 20 + bag.height;
                 bag.dy *= -1;
             }
         }
 
-//     if (bag.x + bag.width  >= CANVAS_WIDTH) {
-//         bag.x = CANVAS_WIDTH - bag.width;
-//         bag.y += velocity * 3;
-//         if (bag.y + bag.height >= CANVAS_HEIGHT) {
-//             bag.y = CANVAS_HEIGHT - bag.height;
-//            } 
-     
-//        } else if (bag.x < r && bag.y > 0) {
-//     bag.x += velocity * 5;
-//     bag.y -= velocity;      
-//    } else if(bag.x >= r && bag.y < CANVAS_HEIGHT - 8) {
-//     bag.y += velocity;     
-//     bag.x += velocity * 5; 
-//    } else if (bag.x === r) {
-//         bag.x = bag.x;           
-//    };
-
    //detecting collision with cup
-   if(cupSide1.x  > bag.x + bag.width -6 ||
-    cupSide1.x + cupSide1.width -6 < bag.x ||
-    cupSide1.y + 6 > bag.y + bag.height ||
-    cupSide1.y + cupSide1.height + 6 < bag.y)
+   if(cupSide1.x  > bag.x + bag.width -10 ||
+    cupSide1.x + cupSide1.width -10 < bag.x ||
+    cupSide1.y + 10 > bag.y + bag.height ||
+    cupSide1.y + cupSide1.height + 10 < bag.y)
     { 
-        // console.log('no collision');
-    } else {
-    // console.log('BANG!!!');
+
+    } else { 
     bag.x = cupSide1.x - bag.width;
     bag.y += bag.gravity * 3;
-    // collide();
     } 
 
-    if(cupSide2.x  > bag.x + bag.width -6 ||
-        cupSide2.x + cupSide2.width -6 < bag.x ||
-        cupSide2.y + 6 > bag.y + bag.height ||
-        cupSide2.y + cupSide2.height + 6 < bag.y)
+    if(cupSide2.x  > bag.x + bag.width -10 ||
+        cupSide2.x + cupSide2.width -10 < bag.x ||
+        cupSide2.y + 10 > bag.y + bag.height ||
+        cupSide2.y + cupSide2.height + 10 < bag.y)
     { 
-// console.log('no collision');
+
     } else {
-// console.log('BANG!!!');
+
         bag.x = cupSide2.x - bag.width;
         bag.y += bag.gravity * 3;
-        // collide();
+ 
     } 
-   if(cupBottom.x  > bag.x + bag.width -6 ||
-    cupBottom.x + cupBottom.width -6 < bag.x ||
-    cupBottom.y + 6 > bag.y + bag.height ||
-    cupBottom.y + cupBottom.height + 6 < bag.y)
+   if(cupBottom.x  > bag.x + bag.width -8 ||
+    cupBottom.x + cupBottom.width -8 < bag.x ||
+    cupBottom.y + 8 > bag.y + bag.height ||
+    cupBottom.y + cupBottom.height + 8 < bag.y)
     { 
-        // console.log('no collision');
+
     } else {
-        // console.log('BANG!!!');
         collisionDetected = true;
         collide();
     };
     function collide() {
-        bag.x = 804;
-        bag.y = 522;
+        bag.x = 792;
+        bag.y = 501;
+        
         console.log('you scored!')
     };
 };
@@ -305,17 +287,16 @@ function animate() {
     ctx.clearRect(0,0, CANVAS_WIDTH, CANVAS_HEIGHT);
     hand.draw();
     ctx.restore();
+    ctx.drawImage(cupBack, 0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
     teaBags.forEach(teabag => {
         teabag.move();
         teaBagCollision(teabag);
         teabag.draw();
-    })
-        // teabag.draw();
+    });
         cupSide1.draw();
         cupSide2.draw();
         cupBottom.draw();
-        
-        // teabag.update();
+       
         ctx.drawImage(cupFront, 0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
         requestAnimationFrame(animate);
 };
@@ -394,129 +375,147 @@ animate();
 
 // //this calculates the distance and trajectory of the throw based on the 
 // //velocity and angle given by the user
-function movement(v, a) {
+// function movement(v, a) {
     //determine the curve of the trajectory by plotting the object's position
     //at different time intervals along the parabolic path.
     
     //1.split velocity into its horizontal, vx, and vertical, vy, components &
     //calculate the initial vertical and horizontal velocitys
     // console.log('test v = ', v, 'test a=', a )
-    vy = v * Math.sin(a);
-    vx = v * Math.cos(a);
+    // vy = v * Math.sin(a);
+    // vx = v * Math.cos(a);
 
-    if(vy < 0) vy * -1;
-    if(vx < 0) vx * -1;
+    // if(vy < 0) vy * -1;
+    // if(vx < 0) vx * -1;
     // console.log ('testing vy & vx. vy = ', vy, 'vx=', vx);
     //2.calculate time(t) of flight
-     t = (2 * vy)/g
-    if(t < 0) t * -1;
+    //  t = (2 * vy)/g
+    // if(t < 0) t * -1;
     // console.log('testing t =', t);
 
     //3.calculate max height, h, reached by the object
-    h = (vy * vy)/(2*g) * 1000;
+    // h = (vy * vy)/(2*g) * 1000;
     
-    if(h < 0) h * -1;
+    // if(h < 0) h * -1;
     // console.log('testing h =', h);
     //4.calculate the horizontal distance, d, traveled by the object
-     d = (vx * t) * 5000;
+    //  d = (vx * t) * 5000;
     
-    if (d<0) d * -1;
+    // if (d<0) d * -1;
     // console.log('testing d =', d);
     //5.calculate the range, r, which is the horizontal distance
     //traveled by the object when it returns to the same height as launch point
-     r = 2 * d;
-     if(r < 0) r = r * -1;
-    console.log('testing r =', r);
-}
+//      r = 2 * d;
+//      if(r < 0) r = r * -1;
+//     console.log('testing r =', r);
+// }
 
 // console.log(movement(velocity, angle));
 // vy = velocity * Math.sin(angle);
 // let time = (2 * vy)/g;
-const teabag = {
-    x: 86,
-    y: 230,
-    width: 15,
-    height: 15,
-    currentY: 0,
-    maxY: CANVAS_HEIGHT/2 + angle,
-    angle: angle,
-    angleSpeed: 1,
-    curve: 1,
+// const teabag = {
+//     x: 86,
+//     y: 230,
+//     width: 15,
+//     height: 15,
+//     currentY: 0,
+//     maxY: CANVAS_HEIGHT/2 + angle,
+//     angle: angle,
+//     angleSpeed: 1,
+//     curve: 1,
     
-     update() {          
-        // this.angle += this.angleSpeed;
-        if (this.x + this.width  >= CANVAS_WIDTH) {
-            this.x = CANVAS_WIDTH - this.width;
-            this.y += velocity * 3;
-            if (this.y + this.height >= CANVAS_HEIGHT) {
-                this.y = CANVAS_HEIGHT - this.height;
-               } 
+    //  update() {          
+    //     // this.angle += this.angleSpeed;
+    //     if (this.x + this.width  >= CANVAS_WIDTH) {
+    //         this.x = CANVAS_WIDTH - this.width;
+    //         this.y += velocity * 3;
+    //         if (this.y + this.height >= CANVAS_HEIGHT) {
+    //             this.y = CANVAS_HEIGHT - this.height;
+    //            } 
          
-           } else if (this.x < r && this.y > 0) {
-        this.x += velocity * 5;
-        this.y -= velocity;      
-       } else if(this.x >= r && this.y < CANVAS_HEIGHT - 8) {
-        this.y += velocity;     
-        this.x += velocity * 5; 
-       } else if (this.x === r) {
-            this.x = this.x;           
-       };
+    //        } else if (this.x < r && this.y > 0) {
+    //     this.x += velocity * 5;
+    //     this.y -= velocity;      
+    //    } else if(this.x >= r && this.y < CANVAS_HEIGHT - 8) {
+    //     this.y += velocity;     
+    //     this.x += velocity * 5; 
+    //    } else if (this.x === r) {
+    //         this.x = this.x;           
+    // //    };
 
-       if(cupSide1.x  > teabag.x + teabag.width -6 ||
-        cupSide1.x + cupSide1.width -6 < teabag.x ||
-        cupSide1.y + 6 > teabag.y + teabag.height ||
-        cupSide1.y + cupSide1.height + 6 < teabag.y)
-        { 
+    //    if(cupSide1.x  > teabag.x + teabag.width -6 ||
+    //     cupSide1.x + cupSide1.width -6 < teabag.x ||
+    //     cupSide1.y + 6 > teabag.y + teabag.height ||
+    //     cupSide1.y + cupSide1.height + 6 < teabag.y)
+    //     { 
             // console.log('no collision');
-        } else {
-                // console.log('BANG!!!');
-                this.x = cupSide1.x - this.width;
-                this.y += velocity * 3;
-                // teabag.collide();
-            } 
+        // } else {
+    //             // console.log('BANG!!!');
+    //             // this.x = cupSide1.x - this.width;
+    //             // this.y += velocity * 3;
+    //             // // teabag.collide();
+    //         } 
 
-            if(     cupSide2.x  > teabag.x + teabag.width -6 ||
-                    cupSide2.x + cupSide2.width -6 < teabag.x ||
-                    cupSide2.y + 6 > teabag.y + teabag.height ||
-                    cupSide2.y + cupSide2.height + 6 < teabag.y)
-                { 
-                    // console.log('no collision');
-                } else {
-                        // console.log('BANG!!!');
-                        this.x = cupSide2.x - this.width;
-                        this.y += velocity * 3;
-                        // teabag.collide();
-                    } 
+    //         if(     cupSide2.x  > teabag.x + teabag.width -6 ||
+    //                 cupSide2.x + cupSide2.width -6 < teabag.x ||
+    //                 cupSide2.y + 6 > teabag.y + teabag.height ||
+    //                 cupSide2.y + cupSide2.height + 6 < teabag.y)
+    //             { 
+    //                 // console.log('no collision');
+    //             } else {
+    //                     // console.log('BANG!!!');
+    //                     this.x = cupSide2.x - this.width;
+    //                     this.y += velocity * 3;
+    //                     // teabag.collide();
+    //                 } 
+
+                    
             
-        //     else {
-        //     console.log('BANG!!!');
-        //     this.x = cupSide1.x - this.width;
-        //     this.y += velocity * 3;
-        //     // teabag.collide();
-        // }
-        // ;
-       if(cupBottom.x  > teabag.x + teabag.width -6 ||
-        cupBottom.x + cupBottom.width -6 < teabag.x ||
-        cupBottom.y + 6 > teabag.y + teabag.height ||
-        cupBottom.y + cupBottom.height + 6 < teabag.y)
-        { 
-            // console.log('no collision');
-        } else {
-            // console.log('BANG!!!');
-            teabag.collide();
-        };
+    //     //     else {
+    //     //     console.log('BANG!!!');
+    //     //     this.x = cupSide1.x - this.width;
+    //     //     this.y += velocity * 3;
+    //     //     // teabag.collide();
+    //     // }
+    //     // ;
+    //    if(cupBottom.x  > teabag.x + teabag.width -6 ||
+    //     cupBottom.x + cupBottom.width -6 < teabag.x ||
+    //     cupBottom.y + 6 > teabag.y + teabag.height ||
+    //     cupBottom.y + cupBottom.height + 6 < teabag.y)
+    //     { 
+    //         // console.log('no collision');
+    //     } else {
+    //         // console.log('BANG!!!');
+    //         teabag.collide();
+    //     };
 
-    },
-     draw() {
-        ctx.beginPath();
-        // ctx.rect(this.x, this.y, this.width, this.height)
-        ctx.arc(this.x, this.y, this.width, 0, 2 * Math.PI);        
-        ctx.stroke();
-     },
-    //  collide() {
-    //     teabag.x = 804;
-    //     teabag.y = 522;
+    // },
+    //  draw() {
+    //     ctx.beginPath();
+    //     // ctx.rect(this.x, this.y, this.width, this.height)
+    //     ctx.arc(this.x, this.y, this.width, 0, 2 * Math.PI);        
+    //     ctx.stroke();
+    //  },
+    // //  collide() {
+    // //     teabag.x = 804;
+    // //     teabag.y = 522;
     //     console.log('you scored!')
     //  }
-}
+// }
 
+//     if (bag.x + bag.width  >= CANVAS_WIDTH) {
+//         bag.x = CANVAS_WIDTH - bag.width;
+//         bag.y += velocity * 3;
+//         if (bag.y + bag.height >= CANVAS_HEIGHT) {
+//             bag.y = CANVAS_HEIGHT - bag.height;
+//            } 
+     
+//        } else if (bag.x < r && bag.y > 0) {
+//     bag.x += velocity * 5;
+//     bag.y -= velocity;      
+//    } else if(bag.x >= r && bag.y < CANVAS_HEIGHT - 8) {
+//     bag.y += velocity;     
+//     bag.x += velocity * 5; 
+//    } else if (bag.x === r) {
+//         bag.x = bag.x;           
+//    };
