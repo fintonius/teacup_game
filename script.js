@@ -5,10 +5,47 @@ const ctx = canvas.getContext('2d');
 CANVAS_WIDTH =  canvas.width = 1000;
 CANVAS_HEIGHT = canvas.height = 600;
 
+let handImage = new Image();
+handImage.src = 'images/hand-holding.png'; 
+
+let cupFront = new Image();
+cupFront.src = 'images/cup-front-fill.png';
+// hand.onload = renderImages;
+
+//the image wasn't loading before the canvas so this solved the problem
+//taken from Qixotl LFC youtube video
+// let imgCount = 1;
+// function renderImages() {
+//     if(--imgCount > 0){return}
+//     call animate() when all images have loaded
+//     animate();
+// }
+
 let cursorPos = document.addEventListener('click', (e) => {
     console.log('x = ', e.x, 'y = ', e.y)
 })
 
+let mousePosition = null;
+let handAngle = null;
+
+//monitors when user moves mouse over canvas
+canvas.addEventListener('mousemove', e => {
+    mousePosition = {
+        //using .offset to calculate cursor position in relation to 
+        //the canvas and not the viewport which is what e.client refers to
+        x: e.clientX - canvas.offsetLeft,
+        y: e.clientY - canvas.offsetTop,
+    }
+});
+
+canvas.addEventListener('click', e => {
+    if(handAngle < -2 || handAngle > 0.5) return;
+
+    let teaBagPos = teabagPosition(hand.x, hand.y)
+    teaBags.push(
+        new singleTeaBag(handAngle, teaBagPos.x, teaBagPos.y)
+    );
+})
 
 const userInput = document.getElementById('userInput');
 let g = 9.8;
@@ -99,8 +136,8 @@ function movement(v, a) {
 // vy = velocity * Math.sin(angle);
 // let time = (2 * vy)/g;
 const teabag = {
-    x: 10,
-    y: 300,
+    x: 86,
+    y: 230,
     width: 15,
     height: 15,
     currentY: 0,
@@ -135,7 +172,7 @@ const teabag = {
         { 
             // console.log('no collision');
         } else {
-                console.log('BANG!!!');
+                // console.log('BANG!!!');
                 this.x = cupSide1.x - this.width;
                 this.y += velocity * 3;
                 // teabag.collide();
@@ -148,7 +185,7 @@ const teabag = {
                 { 
                     // console.log('no collision');
                 } else {
-                        console.log('BANG!!!');
+                        // console.log('BANG!!!');
                         this.x = cupSide2.x - this.width;
                         this.y += velocity * 3;
                         // teabag.collide();
@@ -166,9 +203,9 @@ const teabag = {
         cupBottom.y + 6 > teabag.y + teabag.height ||
         cupBottom.y + cupBottom.height + 6 < teabag.y)
         { 
-            console.log('no collision');
+            // console.log('no collision');
         } else {
-            console.log('BANG!!!');
+            // console.log('BANG!!!');
             teabag.collide();
         };
 
@@ -179,9 +216,11 @@ const teabag = {
         ctx.arc(this.x, this.y, this.width, 0, 2 * Math.PI);        
         ctx.stroke();
      },
-     collide() {
-        console.log('you scored!')
-     }
+    //  collide() {
+    //     teabag.x = 804;
+    //     teabag.y = 522;
+    //     console.log('you scored!')
+    //  }
 }
 
 const cupBottom = {
@@ -221,19 +260,177 @@ const cupSide2 = {
     },
 }
 
+
+//to calculate the correct starting position for the teabag when the user clicks
+function teabagPosition(x, y) {
+    let rotatedAngle = handAngle;
+//works out distance between rotation point and tip of hand
+    let dx = x - (hand.x + 57);
+    let dy = y - (hand.y - 118);
+    let distance = Math.sqrt(dx * dx + dy * dy);
+    let originalAngle = Math.atan2(dy, dx);
+//works out the new position for teabag starting point
+    let newX = (hand.x + 57) + distance * Math.cos(originalAngle + rotatedAngle);
+    let newY = (hand.y - 118) + distance * Math.sin(originalAngle + rotatedAngle);
+
+    return {
+        x: newX,
+        y: newY
+    }
+}
+
+class Hand {
+    constructor(x, y){
+        this.x = x;
+        this.y = y;
+    }
+
+    draw(){
+//ctx.save is to save the canvas state before the canvas is rotated 
+//and ctx.restore is invoked in the animate function immediately after
+//hand.draw so the canvas is restored to the saved state so it looks like
+//only the hand has moved
+        ctx.save();
+        this.rotateHand();
+        ctx.drawImage(handImage, this.x - 60, this.y - 115, 115, 236);
+    }
+
+    rotateHand() {
+        if(mousePosition) {
+            handAngle = Math.atan2(mousePosition.y - this.y,
+            mousePosition.x - this.x);
+//the below rotates the canvas around the hand image based on the position
+//of the cursor. First the canvas has to be offset in relation to the
+//hand image so the rotation happens around its position rather than the 0,0
+//coordinates of the canvas top which is what normally happens. The canvas
+//position is then reset to normal so it doesn't look like it's moved.
+//I don't know why this is the way to animate rotation! I will need to study
+//it further. 
+            ctx.translate(this.x -60, this.y +115);
+            ctx.rotate(handAngle);
+            ctx.translate(-this.x +60, -this.y - 115);
+        }
+    }
+}
+
+let hand = new Hand(81, 309);
+
+class singleTeaBag {
+    constructor(angle, x, y) {
+        this.radius = 15;
+        this.height = 15;
+        this.width = 15;
+        this.mass = this.radius;
+        this.angle = angle;
+        this.x = x;
+        this.y = y;
+        this.dx = Math.cos(angle) * 7;
+        this.dy = Math.sin(angle) * 7;
+        this.gravity = 0.08;
+    }
+
+    move() {
+//factors gravity into the teabags movement
+        if(this.y + this.gravity < 600){
+            this.dy += this.gravity;
+        }
+        this.x += this.dx;
+        this.y += this.dy;
+    }
+
+    draw() {
+        ctx.fillStyle = 'grey';
+        ctx.beginPath();
+        ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
+        ctx.fill();
+    }
+}
+
+let teaBags = [];
+
+function teaBagCollision(singleTeaBag){
+    
+    //detecting collision with canvas edge
+    if (singleTeaBag.x + singleTeaBag.width  >= CANVAS_WIDTH) {
+        singleTeaBag.x = CANVAS_WIDTH - singleTeaBag.width;
+        singleTeaBag.y += velocity * 3;
+        if (singleTeaBag.y + singleTeaBag.height >= CANVAS_HEIGHT) {
+            singleTeaBag.y = CANVAS_HEIGHT - singleTeaBag.height;
+           } 
+     
+       } else if (singleTeaBag.x < r && singleTeaBag.y > 0) {
+    singleTeaBag.x += velocity * 5;
+    singleTeaBag.y -= velocity;      
+   } else if(singleTeaBag.x >= r && singleTeaBag.y < CANVAS_HEIGHT - 8) {
+    singleTeaBag.y += velocity;     
+    singleTeaBag.x += velocity * 5; 
+   } else if (singleTeaBag.x === r) {
+        singleTeaBag.x = singleTeaBag.x;           
+   };
+
+   //detecting collision with cup
+   if(cupSide1.x  > singleTeaBag.x + singleTeaBag.width -6 ||
+    cupSide1.x + cupSide1.width -6 < singleTeaBag.x ||
+    cupSide1.y + 6 > singleTeaBag.y + singleTeaBag.height ||
+    cupSide1.y + cupSide1.height + 6 < singleTeaBag.y)
+    { 
+        // console.log('no collision');
+    } else {
+            // console.log('BANG!!!');
+            singleTeaBag.x = cupSide1.x - singleTeaBag.width;
+            singleTeaBag.y += velocity * 3;
+            collide();
+        } 
+
+        if(     cupSide2.x  > singleTeaBag.x + singleTeaBag.width -6 ||
+                cupSide2.x + cupSide2.width -6 < singleTeaBag.x ||
+                cupSide2.y + 6 > singleTeaBag.y + singleTeaBag.height ||
+                cupSide2.y + cupSide2.height + 6 < singleTeaBag.y)
+            { 
+                // console.log('no collision');
+            } else {
+                    // console.log('BANG!!!');
+                    singleTeaBag.x = cupSide2.x - singleTeaBag.width;
+                    singleTeaBag.y += velocity * 3;
+                    collide();
+                } 
+   if(cupBottom.x  > singleTeaBag.x + singleTeaBag.width -6 ||
+    cupBottom.x + cupBottom.width -6 < singleTeaBag.x ||
+    cupBottom.y + 6 > singleTeaBag.y + singleTeaBag.height ||
+    cupBottom.y + cupBottom.height + 6 < singleTeaBag.y)
+    { 
+        console.log('no collision');
+    } else {
+        console.log('BANG!!!');
+        collide();
+    };
+    function collide() {
+        singleTeaBag.x = 804;
+        singleTeaBag.y = 522;
+        console.log('you scored!')
+    }
+
+}
+
+
+
 function animate() {
     ctx.clearRect(0,0, CANVAS_WIDTH, CANVAS_HEIGHT);
+    hand.draw();
+    ctx.restore();
+    teaBags.forEach(teabag => {
+        teabag.move();
         teabag.draw();
+        teaBagCollision(teabag);
+    })
+        // teabag.draw();
         cupSide1.draw();
         cupSide2.draw();
         cupBottom.draw();
-        teabag.update();
         
+        // teabag.update();
+        ctx.drawImage(cupFront, 0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
         requestAnimationFrame(animate);
 };
 
-
-// console.log('cup x and width', cup.x, cup.width);
-// console.log('cup.x + width', (cup.x + cup.width));
-// console.log('teabag x and width', teabag.x, teabag.width);
-// console.log('teabag.x + width', (teabag.x + teabag.width));
+animate();
