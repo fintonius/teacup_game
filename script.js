@@ -277,7 +277,7 @@ function teaBagCollision(bag){
         bag.x = 792;
         bag.y = 501;
         
-        console.log('you scored!')
+        alert(`Congratulations, it's tea time! Refresh the page to try again :)`)
     };
 };
 
